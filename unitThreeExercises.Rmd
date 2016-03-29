@@ -1,0 +1,508 @@
+---
+title: "ISLR Unit 3 Exercises"
+author: "Brent Lockee"
+date: "Thursday, March 24, 2016"
+output: html_document
+---
+
+Conceptual
+
+1. Describe the null hypotheses to which the p-values given in Table 3.4
+correspond. Explain what conclusions you can draw based on these
+p-values. Your explanation should be phrased in terms of sales, TV,
+radio, and newspaper, rather than in terms of the coefficients of the
+linear model.
+
+The null hypothesis on the TV line is that holding radio and newspaper fixed, TV has no effect on sales. On the radio line, the null hypothesis is that while holding TV and newpaper fixed, radio has no impact on sales. On the newspaper line, the null hypothesis is that while holding radio and TV fixed, newspaper has no effect on sales. The null hypothesis for the intercept line is that the intercept value is zero. From the given p values, we are able to reject the null hypothesis regarding the intercept, TV, and radio. We are not able to reject the null hypothesis for newspaper.
+
+2. Carefully explain the differences between the KNN classifier and KNN
+regression methods.
+
+The KNN regression method seeks to estimate the function for a given point by averaging the response of the specified number of neighbors. This is required because KNN regression deals with quantitative values rather than qualitative. KNN Classification assigns a point, x, to a class based on its most likely class given the classes of its neighbors.
+
+3. Suppose we have a data set with five predictors, X1 =GPA, X2 = IQ,
+X3 = Gender (1 for Female and 0 forMale), X4 = Interaction between
+GPA and IQ, and X5 = Interaction between GPA and Gender. The
+response is starting salary after graduation (in thousands of dollars).
+Suppose we use least squares to fit the model, and get ˆß0 = 50, ˆß1 =
+20, ˆß2 = 0.07, ˆß3 = 35, ˆß4 = 0.01, ˆß5 = -10.
+
+(a) Which answer is correct, and why?
+
+i. For a fixed value of IQ and GPA, males earn more on average
+than females.
+
+ii. For a fixed value of IQ and GPA, females earn more on
+average than males. 
+
+iii. For a fixed value of IQ and GPA, males earn more on average
+than females provided that the GPA is high enough. 
+
+Correct iii
+
+iv. For a fixed value of IQ and GPA, females earn more on
+average than males provided that the GPA is high enough.
+
+(b) Predict the salary of a female with IQ of 110 and a GPA of 4.0.
+
+```{r}
+50 + 20*4 + .07*110 + 35 + .01*4*110 + -10*4
+```
+
+(c) True or false: Since the coefficient for the GPA/IQ interaction
+term is very small, there is very little evidence of an interaction
+effect. Justify your answer.
+
+False. A small coefficient could still be significant if the p value is small enough. The small coefficient could be a result of the scale of the variables: IQ has an average of 100 in the population while GPA has a maximum of 4. They have very different scales.
+
+4. I collect a set of data (n = 100 observations) containing a single
+predictor and a quantitative response. I then fit a linear regression
+model to the data, as well as a separate cubic regression, i.e. Y =
+ß0 + ß1X + ß2X2 + ß3X3 + .
+
+(a) Suppose that the true relationship between X and Y is linear,
+i.e. Y = ß0 + ß1X + . Consider the training residual sum of
+squares (RSS) for the linear regression, and also the training
+RSS for the cubic regression. Would we expect one to be lower
+than the other, would we expect them to be the same, or is there
+not enough information to tell? Justify your answer.
+
+The RSS for the cubic regression will be lower because adding features always lowers the training RSS.
+
+(b) Answer (a) using test rather than training RSS.
+
+The Test RSS will most likely be higher for the cubic regression because the relationship is truly linear and adding squared and cubic terms added to the variance of the model and allowed some measure of overfitting to the training data.
+
+(c) Suppose that the true relationship between X and Y is not linear,
+but we don’t know how far it is from linear. Consider the training
+RSS for the linear regression, and also the training RSS for the
+cubic regression. Would we expect one to be lower than the
+other, would we expect them to be the same, or is there not
+enough information to tell? Justify your answer.
+
+The training RSS for the cubic regression would be lower than for the linear regression because adding features lowers the training RSS.
+
+(d) Answer (c) using test rather than training RSS.
+
+Not enough information. If the bias of the linear model is less than the variance introduced by the cubic regression, it will have a lower RSS. The opposite, more bias in the linear model than variance added by the cubic regression, would result in a lower RSS for the cubic regression. Without more information, we can't know which is the case.
+
+
+Applied
+
+8. This question involves the use of simple linear regression on the Auto
+data set.
+
+```{r}
+auto <- read.csv("Auto.csv", na.strings = "?")
+```
+
+(a) Use the lm() function to perform a simple linear regression with
+mpg as the response and horsepower as the predictor. Use the
+summary() function to print the results. Comment on the output.
+For example:
+
+```{r}
+auto.lm <- lm(mpg~horsepower, data=auto)
+summary(auto.lm)
+```
+
+i. Is there a relationship between the predictor and the response?
+
+Yes, there is clearly a relationship between horsepower and mpg based on the near-zero p value.
+
+ii. How strong is the relationship between the predictor and
+the response?
+
+The significance of the relationship is very strong as indicated by the very low p value. The estimate of the coefficient is -0.158. Horsepower values in this dataset are 5x or more mpg for most entry, so a small coefficient value is expected and does nothing to weaken the case that this is in fact a significant relationship.
+
+iii. Is the relationship between the predictor and the response
+positive or negative?
+
+negative
+
+iv. What is the predicted mpg associated with a horsepower of
+98? What are the associated 95% confidence and prediction
+intervals?
+
+```{r}
+prediction.auto <- predict(auto.lm, newdata = data.frame(horsepower = c(98)), interval="confidence")
+prediction.auto
+
+prediction.auto <- predict(auto.lm, newdata = data.frame(horsepower = c(98)), interval="prediction")
+prediction.auto
+```
+
+(b) Plot the response and the predictor. Use the abline() function
+to display the least squares regression line.
+
+```{r}
+par(mfrow = c(1,1))
+plot(auto$horsepower, auto$mpg)
+abline(auto.lm)
+```
+
+(c) Use the plot() function to produce diagnostic plots of the least
+squares regression fit. Comment on any problems you see with
+the fit.
+
+```{r}
+par(mfrow = c(2,2))
+plot(auto.lm)
+```
+The Residuals vs Fitted plot shows evidence of a nonlinear relationship. Residuals spike sharply upward with a fitted value of 25 or more. There are also a handful of high leverage data points as seen in the Residuals vs Leverage plot. 
+
+9. This question involves the use of multiple linear regression on the
+Auto data set.
+
+(a) Produce a scatterplot matrix which includes all of the variables
+in the data set.
+
+```{r}
+pairs(auto[,1:8])
+```
+
+(b) Compute the matrix of correlations between the variables using
+the function cor(). You will need to exclude the name variable,
+cor()
+which is qualitative.
+
+```{r}
+auto <- auto[complete.cases(auto),]
+cor(auto[,1:8])
+```
+
+(c) Use the lm() function to perform a multiple linear regression
+with mpg as the response and all other variables except name as
+the predictors. Use the summary() function to print the results.
+Comment on the output. For instance:
+
+```{r}
+auto.lm <- lm(mpg~.-name, data=auto)
+summary(auto.lm)
+```
+
+i. Is there a relationship between the predictors and the response?
+
+Yes, overall, the model has a very low p value and accounts for a large percent of the variability of the response with an Adjusted R squared of 0.82.
+
+ii. Which predictors appear to have a statistically significant
+relationship to the response?
+
+origin2, origin3, year, weight, and displacement
+
+iii. What does the coefficient for the year variable suggest?
+
+Newer cars have a higher mpg value.
+
+(d) Use the plot() function to produce diagnostic plots of the linear
+regression fit. Comment on any problems you see with the fit.
+Do the residual plots suggest any unusually large outliers? Does
+the leverage plot identify any observations with unusually high
+leverage?
+
+```{r}
+plot(auto.lm)
+```
+
+Point 323 has a residual value +4 standard deviations above the average residual value. It isn't overly concerning because it's a low leverage point. Point 14 has very high leverage compared to all the other points. 
+
+(e) Use the * and : symbols to fit linear regression models with
+interaction effects. Do any interactions appear to be statistically
+significant?
+
+```{r}
+auto.lm2 <- lm(mpg~origin*year*weight*displacement, data = auto)
+summary(auto.lm2)
+```
+
+```{r}
+auto.lm3 <- lm(mpg~origin+year+displacement+weight+origin:year+year:weight+origin:displacement+origin:year:displacement, data = auto)
+summary(auto.lm3)
+```
+
+(f) Try a few different transformations of the variables, such as
+
+```{r}
+auto.lm4 <- lm(mpg~.-name-acceleration-horsepower-cylinders+I(weight^2)+I(acceleration^2), data = auto)
+summary(auto.lm4)
+
+plot(auto.lm4)
+```
+
+10. This question should be answered using the Carseats data set.
+
+(a) Fit a multiple regression model to predict Sales using Price,
+Urban, and US.
+
+```{r}
+library(ISLR)
+fix(Carseats)
+
+seat.lm <- lm(Sales~Price+Urban+US, data = Carseats)
+summary(seat.lm)
+```
+
+
+(b) Provide an interpretation of each coefficient in the model. Be
+careful—some of the variables in the model are qualitative!
+
+Price has a significant, negative relationship with sales. The value of the Urban variable does not appear to have an impact on the value of the sales variable. The US variable, however, does have an impact on sales. Entries in the dataset with 'Yes' in the US column have an average Sales value that is 1.2 higher than entries with 'No' in the US column, holding Price and Urban fixed.
+
+(c) Write out the model in equation form, being careful to handle
+the qualitative variables properly.
+
+(d) For which of the predictors can you reject the null hypothesis
+H0 : ßj = 0?
+
+Price and US (USYes)
+
+(e) On the basis of your response to the previous question, fit a
+smaller model that only uses the predictors for which there is
+evidence of association with the outcome.
+
+```{r}
+seat.lm2 <- lm(Sales~Price+US, data = Carseats)
+summary(seat.lm2)
+```
+
+
+(f) How well do the models in (a) and (e) fit the data?
+
+They both have near-zero p values, so the relationship is statistically significant. However, the adjusted R squared for each is ~0.23 meaning that the model accounts for less than a quarter of the variability of the response.
+
+(g) Using the model from (e), obtain 95% confidence intervals for
+the coefficient(s).
+
+```{r}
+confint(seat.lm2)
+```
+
+An approximation, hand calculated:
+Intercept: 11.77 - 14.29
+Price: -0.0645 - -.0445
+USYes: 0.68 - 1.72
+
+(h) Is there evidence of outliers or high leverage observations in the
+model from (e)?
+```{r}
+par(mfrow = c(2,2))
+plot(seat.lm2)
+```
+
+There is one point withn noticeably higher leverage than average but it has a small residual value and doesn't have a concerningly high leverage score in my estimation.
+
+11. In this problem we will investigate the t-statistic for the null hypothesis
+H0 : ß = 0 in simple linear regression without an intercept. To
+begin, we generate a predictor x and a response y as follows.
+
+(a) Perform a simple linear regression of y onto x, without an intercept.
+Report the coefficient estimate ˆß, the standard error of
+this coefficient estimate, and the t-statistic and p-value associated
+with the null hypothesis H0 : ß = 0. Comment on these
+results. (You can perform regression without an intercept using
+the command lm(y~x+0).)
+
+```{r}
+set.seed(1)
+x=rnorm(100)
+y=2*x+rnorm(100)
+
+lm.fit <- lm(y~x+0)
+summary(lm.fit)
+```
+
+(b) Now perform a simple linear regression of x onto y without an
+intercept, and report the coefficient estimate, its standard error,
+and the corresponding t-statistic and p-values associated with
+the null hypothesis H0 : ß = 0. Comment on these results.
+
+```{r}
+lm.fit2 <- lm(x~y+0)
+summary(lm.fit2)
+```
+
+(c) What is the relationship between the results obtained in (a) and
+(b)?
+
+The t and p values are identical, as are the R squared and adjusted R squared values. The coefficient and standard error have the same ratios between the two models.
+
+```{r}
+1.9939/.3911
+.1065/.02089
+```
+
+(f) In R, show that when regression is performed with an intercept,
+the t-statistic for H0 : ß1 = 0 is the same for the regression of y
+onto x as it is for the regression of x onto y.
+
+```{r}
+lm.fit3 <- lm(y~x)
+summary(lm.fit3)
+lm.fit4 <- lm(x~y)
+summary(lm.fit4)
+```
+
+12. This problem involves simple linear regression without an intercept.
+
+(a) Recall that the coefficient estimate ˆ ß for the linear regression of
+Y onto X without an intercept is given by (3.38). Under what
+circumstance is the coefficient estimate for the regression of X
+onto Y the same as the coefficient estimate for the regression of
+Y onto X?
+
+The coefficients will be the same only when the sum of squares for x and y are equal.
+
+(b) Generate an example in R with n = 100 observations in which
+the coefficient estimate for the regression of X onto Y is different
+from the coefficient estimate for the regression of Y onto X.
+
+See problem 11 - those coefficient estimates were different.
+
+(c) Generate an example in R with n = 100 observations in which
+the coefficient estimate for the regression of X onto Y is the
+same as the coefficient estimate for the regression of Y onto X.
+
+```{r}
+y2 <- sample(x,100)
+y2 <- -y2
+
+lm.12.fit <- lm(y2~x)
+lm.12.fit2 <- lm(x~y2)
+summary(lm.12.fit)
+summary(lm.12.fit2)
+```
+
+13. In this exercise you will create some simulated data and will fit simple
+linear regression models to it. Make sure to use set.seed(1) prior to
+starting part (a) to ensure consistent results.
+
+(a) Using the rnorm() function, create a vector, x, containing 100
+observations drawn from a N(0, 1) distribution. This represents
+a feature, X.
+
+(b) Using the rnorm() function, create a vector, eps, containing 100
+observations drawn from a N(0, 0.25) distribution i.e. a normal
+distribution with mean zero and variance 0.25.
+
+(c) Using x and eps, generate a vector y according to the model
+
+Y = -1 + 0.5X + eps
+
+What is the length of the vector y? What are the values of ß0
+and ß1 in this linear model?
+
+length(y) = 100
+Intercept term = -1
+Coefficient (x) = 0.5
+
+```{r}
+x <- rnorm(100)
+eps <- rnorm(100, mean = 0, sd = .25)
+y <- -1 + .5*x + eps
+```
+
+(d) Create a scatterplot displaying the relationship between x and
+y. Comment on what you observe.
+
+```{r}
+par(mfrow = c(1,1))
+plot(x,y)
+```
+
+There is a clear pattern to the data but also a fair amount of noise.
+
+(e) Fit a least squares linear model to predict y using x. Comment
+on the model obtained. How do ˆ ß0 and ˆ ß1 compare to ß0 and
+ß1?
+
+```{r}
+lm.13.fit <- lm(y~x)
+summary(lm.13.fit)
+```
+
+The predicted coefficients are very close to the actual coefficients. The true coefficients are easily within one standard error of the estimates values.
+
+(f) Display the least squares line on the scatterplot obtained in (d).
+Draw the population regression line on the plot, in a different
+color. Use the legend() command to create an appropriate legend.
+
+```{r}
+par(mfrow = c(1,1))
+plot(x,y)
+abline(lm.13.fit)
+abline(-1,.5, col = "blue")
+
+legend(x="bottomright", legend = c("fit", "actual"), col = c("black", "blue"), text.col = "black", lty = c(1,1))
+```
+
+
+(g) Now fit a polynomial regression model that predicts y using x
+and x2. Is there evidence that the quadratic term improves the
+model fit? Explain your answer.
+
+```{r}
+lm.13.fit2 <- lm(y~x+I(x^2))
+summary(lm.13.fit2)
+summary(lm.13.fit)
+```
+
+The R squared for the model that includes the x^2 term has a slightly higher R squared value than the model without it. However, the p value for the polynomial term does not justify rejecting the null hypothesis for that term and the adjusted R squared term is greater in the model without the polynomial term. Adding predictors always increases the training R squared. Given that, the polynomial term doesn't contribute to, and likely detracts from, the quality of the model.
+
+(h) Repeat (a)–(f) after modifying the data generation process in
+such a way that there is less noise in the data. The model (3.39)
+should remain the same. You can do this by decreasing the variance
+of the normal distribution used to generate the error term
+ in (b). Describe your results.
+
+```{r}
+epsLow <- rnorm(100, mean = 0, sd = 0.05)
+yLow <- -1 + 0.5*x + epsLow
+lm.13.fit3 <- lm(yLow~x)
+summary(lm.13.fit3)
+```
+
+The estimates of the coefficients are closer to the true values and the R squared value has jumped by ~0.2 and is now very close to 1. This makes sense considering there is very little variance in the response that isn't explained by the model.
+
+(i) Repeat (a)–(f) after modifying the data generation process in
+such a way that there is more noise in the data. The model
+(3.39) should remain the same. You can do this by increasing
+the variance of the normal distribution used to generate the
+error term  in (b). Describe your results.
+
+```{r}
+epsHigh <- rnorm(100, mean = 0, sd = 2)
+yHigh <- -1 + 0.5*x + epsHigh
+lm.13.fit4 <- lm(yHigh ~ x)
+summary(lm.13.fit4)
+
+plot(x, yHigh)
+abline(lm.13.fit4)
+```
+
+The coefficient estimates for x is more than 2 times the standard error for that term. The R squared has plummeted and is near zero for this model. The model is still significant given its p value under 0.02, but it explains very little of the variance in the response as indicated by the R squared of ~ 0.05.
+
+(j) What are the confidence intervals for ß0 and ß1 based on the
+original data set, the noisier data set, and the less noisy data
+set? Comment on your results.
+
+```{r}
+# Starter model, moderate noise
+confint(lm.13.fit)
+# Second model, less noise
+confint(lm.13.fit3)
+# Third Model, more noise
+confint(lm.13.fit4)
+```
+
+The confidence intervals widen as more noise is added.
+
+14. This problem focuses on the collinearity problem.
+
+(b) What is the correlation between x1 and x2? Create a scatterplot
+displaying the relationship between the variables.
+
+(c) Using this data, fit a least squares regression to predict y using
+x1 and x2. Describe the results obtained. What are ˆ ß0, ˆ ß1, and
+ˆ ß2? How do these relate to the true ß0, ß1, and ß2? Can you
+reject the null hypothesis H0 : ß1 = 0? How about the null
+hypothesis H0 : ß2 = 0?

@@ -11,21 +11,25 @@ better or worse than an inflexible method. Justify your answer.
 
 (a) The sample size n is extremely large, and the number of predictors
 p is small.
+
     A flexible learning method could be expected to perform better because of the large number
     of samples available.
 
 (b) The number of predictors p is extremely large, and the number
 of observations n is small.
+    
     An inflexible method would likely perform better because a flexible model would likely
     overfit the small number of samples.
 
 (c) The relationship between the predictors and response is highly
 non-linear.
+    
     A flexible model would likely perform better. An inflexible model would introduce a high
     degree of bias because of the disconnect between the model and the underlying data.
 
 (d) The variance of the error terms, i.e. s2 = Var(), is extremely
 high.
+    
     An inflexible model would be preferred because an inflexible model would overfit to
     the large variance of the error.
     
@@ -37,6 +41,7 @@ Finally, provide n and p.
 firm we record profit, number of employees, industry and the
 CEO salary. We are interested in understanding which factors
 affect CEO salary.
+    
     This is a regression problem with n = 500, p = 4 (profit, # employees, industry, CEO salary)
 
 (b) We are considering launching a new product and wish to know
@@ -45,6 +50,7 @@ similar products that were previously launched. For each product
 we have recorded whether it was a success or failure, price
 charged for the product, marketing budget, competition price,
 and ten other variables.
+    
     Classification. n = 20, p = 14
 
 (c) We are interesting in predicting the % change in the US dollar in
@@ -53,7 +59,8 @@ we collect weekly data for all of 2012. For each week we record
 the % change in the dollar, the % change in the US market,
 the % change in the British market, and the % change in the
 German market.
-    Regression. n = 52, p = 4
+   
+   Regression. n = 52, p = 4
 
 3. We now revisit the bias-variance decomposition.
 
@@ -74,6 +81,7 @@ part (a).
 be useful. Describe the response, as well as the predictors. Is the
 goal of each application inference or prediction? Explain your
 answer.
+    
     Predicting whether or not a customer will renew a subscription. Response - renewal yes/no
     Predictors - customer transaction data, demographic data, customer product use history
     
@@ -116,10 +124,12 @@ might be useful.
 
 5. What are the advantages and disadvantages of a very flexible (versus
 a less flexible) approach for regression or classification? 
+    
     A flexible approach enables you to find relationships that wouldn't be identified with a more rigid model. It is well suited to prediction, as it may not be very interpretable for inference. It allows for you to take fuller advantage of large datasets
 
 Under what circumstances might a more flexible approach be preferred to a less
 flexible approach? When might a less flexible approach be preferred?
+    
     A less flexible approach would be preferred for smaller datasets and in cases where interpretability is important.Also in cases with high error variance.
 
 6. Describe the differences between a parametric and a non-parametric
@@ -131,6 +141,7 @@ approach)? What are its disadvantages?
 
 7. The table below provides a training data set containing six observations,
 three predictors, and one qualitative response variable.
+
 Obs.X1 X2 X3 Y
 1   0 3 0 Red
 2   2 0 0 Red
@@ -153,9 +164,11 @@ the test point, X1 = X2 = X3 = 0.
     6) sqrt(3)
 
 (b) What is our prediction with K = 1? Why?
+    
     Green because observation #5 is the closest neighbor
 
 (c) What is our prediction with K = 3? Why?
+    
     Red. Although observation 5 is Green, the two next closest, 2 and 6, are both green.
 
 (d) If the Bayes decision boundary in this problem is highly nonlinear,
@@ -164,14 +177,194 @@ small? Why?
 
     Small because a small k allows for a more nonlinear fit.
 
+Applied Section
+
+(c) i. Use the summary() function to produce a numerical summary
+of the variables in the data set.
+
 ```{r}
-summary(cars)
+college <- read.csv("College.csv")
+rownames(college) <- college[,1]
+college <- college[,-1]
+summary(college)
 ```
 
-You can also embed plots, for example:
+ii. Use the pairs() function to produce a scatterplot matrix of
+the first ten columns or variables of the data. Recall that
+you can reference the first ten columns of a matrix A using
+A[,1:10].
 
-```{r, echo=FALSE}
-plot(cars)
+```{r}
+pairs(college[,1:10])
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+iii. Use the plot() function to produce side-by-side boxplots of
+Outstate versus Private.
+
+```{r}
+plot(college$Private, college$Outstate)
+```
+
+iv. Create a new qualitative variable, called Elite, by binning
+the Top10perc variable. We are going to divide universities
+into two groups based on whether or not the proportion
+of students coming from the top 10% of their high school
+classes exceeds 50%.
+Use the summary() function to see how many elite universities
+there are. Now use the plot() function to produce
+side-by-side boxplots of Outstate versus Elite.
+
+```{r}
+elite <- rep("No", nrow(college))
+elite[college$Top10perc > 50] <- "Yes"
+elite <- as.factor(elite)
+college <- data.frame(college, elite)
+
+summary(college$elite)
+plot(college$elite, college$Outstate)
+```
+
+v. Use the hist() function to produce some histograms with
+differing numbers of bins for a few of the quantitative variables.
+You may find the command par(mfrow=c(2,2)) useful:
+it will divide the print window into four regions so that four
+plots can be made simultaneously. Modifying the arguments
+to this function will divide the screen in other ways.
+
+```{r}
+par(mfrow=c(2,2))
+hist(college$Apps, breaks = 6)
+hist(college$Apps, breaks = 3)
+hist(college$Enroll, breaks = 6)
+hist(college$Books, breaks = 4)
+```
+
+
+9. This exercise involves the Auto data set studied in the lab. Make sure
+that the missing values have been removed from the data.
+
+(a) Which of the predictors are quantitative, and which are qualitative?
+
+All the predictors are quantitative except for origin. The origin factors are coded as numbers but they represent different categories: 1 - American, 2 - European, 3 - Japanese
+
+(b) What is the range of each quantitative predictor? You can answer
+this using the range() function.
+
+```{r}
+Auto <- read.csv("Auto.csv", na.strings = "?")
+Auto <- Auto[complete.cases(Auto),]
+
+apply(Auto[, 1:7], 2, FUN = range)
+```
+
+(c) What is the mean and standard deviation of each quantitative
+predictor?
+
+```{r}
+apply(Auto[, 1:7], 2, FUN = mean)
+apply(Auto[, 1:7], 2, FUN = sd)
+```
+
+(d) Now remove the 10th through 85th observations. What is the
+range, mean, and standard deviation of each predictor in the
+subset of the data that remains?
+
+```{r}
+apply(Auto[-10:-85, 1:7], 2, range)
+
+apply(Auto[-10:-85, 1:7], 2, mean)
+
+apply(Auto[-10:-85, 1:7], 2, sd)
+```
+
+(e) Using the full data set, investigate the predictors graphically,
+using scatterplots or other tools of your choice. Create some plots
+highlighting the relationships among the predictors. Comment
+on your findings.
+
+```{r}
+Auto$origin <- as.factor(Auto$origin)
+pairs(Auto[,1:8])
+```
+
+Horsepower and weight appear strongly, positively correlated. Horsepower seems to be declining over the years covered in this dataset. It's interesting that only cars of American origin have more than six cylinders. Japanese cars appear to be lighter, in horsepower and in weight, than American cars especially.
+
+(f) Suppose that we wish to predict gas mileage (mpg) on the basis
+of the other variables. Do your plots suggest that any of the
+other variables might be useful in predicting mpg? Justify your
+answer.
+
+I think that all of the variables are worth investigating, even year, origin, and acceleration which don't have as immediate and visual of relationships to MPG. Cylinders, horsepower, and weight all seem like great predictors, although the three are closely related to each other, so the model would need to account for that. 
+
+
+10. This exercise involves the Boston housing data set.
+(a) To begin, load in the Boston data set. The Boston data set is
+part of the MASS library in R.
+
+Now the data set is contained in the object Boston.
+
+Read about the data set:
+How many rows are in this data set? How many columns? What
+do the rows and columns represent?
+
+506 columns, 14 rows. Each row represents a town/suburb of Boston. The columns are various demographic and economic variables about the suburb.
+
+(b) Make some pairwise scatterplots of the predictors (columns) in
+this data set. Describe your findings.
+
+```{r}
+library(MASS)
+pairs(Boston)
+```
+
+To me, the most interesting (very subjective, I know) relationships are between nitrogen oxide levels and the distance from work centers (negative correlation), % of land zoned for lots over 25K square feet and distance from work centers (positive correlation), and that suburbs near the river have a smaller range of the # of rooms per house and appear to have more rooms on average than homes not in towns bordered by the river.
+
+(c) Are any of the predictors associated with per capita crime rate?
+If so, explain the relationship.
+
+It looks like being in a town by the river is associated with a lower crime rate. High home value appears to be associated with lower crime. Distance from work centers is negatively correlated with crime and proportion of homes built before 1940 seems to have a positive correlation.
+
+(d) Do any of the suburbs of Boston appear to have particularly
+high crime rates? Tax rates? Pupil-teacher ratios? Comment on
+the range of each predictor.
+
+Yes, there are suburbs with crime rates over 30 or even 80 while the 3rd quartile is 3.67. The tax variable does not have such extreme outliers, the max of 711 is less than 2x the mean. Similary, student teacher rations are more uniform across the suburbs and don't show the extreme concentrations like crime rate does.
+
+(e) How many of the suburbs in this data set bound the Charles
+river?
+
+35
+
+(f) What is the median pupil-teacher ratio among the towns in this
+data set?
+
+```{r}
+summary(Boston$ptratio)
+```
+
+19.05
+
+(g) Which suburb of Boston has lowest median value of owneroccupied
+homes? What are the values of the other predictors
+for that suburb, and how do those values compare to the overall
+ranges for those predictors? Comment on your findings.
+
+Very high crime, not bounded by the river, 75th percentile in student-teacher ratio, very low distance measure, average proportion of black residents, smaller than average homes (by # rooms)
+
+(h) In this data set, how many of the suburbs average more than
+seven rooms per dwelling? More than eight rooms per dwelling?
+Comment on the suburbs that average more than eight rooms
+per dwelling.
+
+```{r}
+summary(Boston$rm > 7)
+summary(Boston$rm > 8)
+```
+
+64 and 13, respectively. These suburbs have low crime rates and student-teacher ratios. Home values are also high. Two of the 13 are bounded by the river.
+
+```{r}
+summary(Boston[Boston$rm > 8, ])
+```
+
+
