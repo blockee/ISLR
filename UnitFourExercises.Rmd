@@ -1,0 +1,88 @@
+---
+title: "Unit 4 Exercises - Classification"
+author: "Brent Lockee"
+date: "Friday, April 01, 2016"
+output: html_document
+---
+
+10. This question should be answered using the Weekly data set, which
+is part of the ISLR package. This data is similar in nature to the
+Smarket data from this chapter’s lab, except that it contains 1, 089
+weekly returns for 21 years, from the beginning of 1990 to the end of
+2010.
+
+(a) Produce some numerical and graphical summaries of the Weekly
+data. Do there appear to be any patterns?
+
+```{r}
+library(ISLR)
+attach(Weekly)
+pairs(Weekly)
+summary(Weekly)
+```
+
+Volume has increased over time and the general trend seems to be upward as 55% of days are 'Up' days and all the daily values have positive means and medians.
+
+(b) Use the full data set to perform a logistic regression with
+Direction as the response and the five lag variables plus Volume
+as predictors. Use the summary function to print the results. Do
+any of the predictors appear to be statistically significant? If so,
+which ones?
+
+```{r}
+glm.10.fit <- glm(Direction~Volume+Lag1+Lag2+Lag3+Lag4+Lag5, data=Weekly, family=binomial)
+summary(glm.10.fit)
+```
+
+Lag2 is significant with a p value of ~0.03
+
+(c) Compute the confusion matrix and overall fraction of correct
+predictions. Explain what the confusion matrix is telling you
+about the types of mistakes made by logistic regression.
+
+```{r}
+glm.pred <- predict(glm.10.fit, type='response')
+
+contrasts(Direction)
+directionPred <- rep("Down", 1089)
+directionPred[glm.pred > .5] <- "Up"
+
+table(directionPred, Direction)
+(54+557)/1089
+54/(54+430)
+557/(557+48)
+```
+
+Logistic regression isn't much of an improvement over guessing that the market will be up each week. This is close to what the logistic regression did, in fact. The model is highly sensitive, but not very specific at all. Lots of false positive (if 'up' is considered the positive condition).
+
+(d) Now fit the logistic regression model using a training data period
+from 1990 to 2008, with Lag2 as the only predictor. Compute the
+confusion matrix and the overall fraction of correct predictions
+for the held out data (that is, the data from 2009 and 2010).
+
+```{r}
+test <- Year > 2008
+glm.10.fit2 <- glm(Direction~Lag2, data=Weekly, family = binomial, subset=-test)
+
+glm.pred2 <- predict(glm.10.fit2, newdata=Weekly[test,], type='response')
+directionPred.glm <- rep("Down", 104)
+directionPred.glm[glm.pred2 > .5] <- "Up"
+table(directionPred.glm, Direction[test])
+mean(directionPred.glm == Direction[test])
+```
+
+(e) Repeat (d) using LDA.
+
+(f) Repeat (d) using QDA.
+
+(g) Repeat (d) using KNN with K = 1.
+
+(h) Which of these methods appears to provide the best results on
+this data?
+
+(i) Experiment with different combinations of predictors, including
+possible transformations and interactions, for each of the
+methods. Report the variables, method, and associated confusion
+matrix that appears to provide the best results on the held
+out data. Note that you should also experiment with values for
+K in the KNN classifier.

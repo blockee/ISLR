@@ -498,11 +498,203 @@ The confidence intervals widen as more noise is added.
 
 14. This problem focuses on the collinearity problem.
 
+```{r}
+set.seed(1)
+x1 <- runif(100)
+x2 <- 0.5*x1+rnorm(100)/10
+y=2+2*x1+0.3*x2+rnorm(100)
+```
+
 (b) What is the correlation between x1 and x2? Create a scatterplot
 displaying the relationship between the variables.
+
+```{r}
+cor(x1,x2)
+```
 
 (c) Using this data, fit a least squares regression to predict y using
 x1 and x2. Describe the results obtained. What are ˆ ß0, ˆ ß1, and
 ˆ ß2? How do these relate to the true ß0, ß1, and ß2? Can you
 reject the null hypothesis H0 : ß1 = 0? How about the null
 hypothesis H0 : ß2 = 0?
+
+```{r}
+lm.14.fit <- lm(y~x1+x2)
+summary(lm.14.fit)
+```
+
+All of the coefficient estimates are within one standard error of the true value, but the standard errors are quite large for the x1 and x2 coefficients. The overall p value of the model is very low, indicating that the model is significant. However, with a R squared of ~ 0.2, the model doesn't go a long way in explaining the variability of the response. The null hypothesis can be rejected for the intercept and the X1 term but not for the x2 term. 
+
+(d) Now fit a least squares regression to predict y using only x1.
+Comment on your results. Can you reject the null hypothesis
+H0 : ß1 = 0?
+
+```{r}
+lm.14.fit2 <- lm(y~x1)
+summary(lm.14.fit2)
+```
+
+The null hypothesis can be rejected. The model maintains approximately the same R squared value as the last model, but the x1 coefficient estimate is much more accurate with a much smaller standard error.
+
+(e) Now fit a least squares regression to predict y using only x2.
+Comment on your results. Can you reject the null hypothesis
+H0 : ß1 = 0?
+
+```{r}
+lm.14.fit3 <- lm(y~x2)
+summary(lm.14.fit3)
+```
+
+Yes, the null hypothesis can be rejected. This model seems to be only slightly inferior, based on R squared and p values, to the previous model. The estimate for the x2 coefficient is very different from the actual value.
+
+(f) Do the results obtained in (c)–(e) contradict each other? Explain
+your answer.
+
+No, because the two terms are highly correlated, it's not surprising that x2 doesn't contribute much to the model in the presence of x1 but does when on its own. 
+
+(g) Now suppose we obtain one additional observation, which was
+unfortunately mismeasured.
+
+```{r}
+x1=c(x1 , 0.1)
+x2=c(x2 , 0.8)
+y=c(y,6)
+```
+
+Re-fit the linear models from (c) to (e) using this new data. What
+effect does this new observation have on the each of the models?
+In each model, is this observation an outlier? A high-leverage
+point? Both? Explain your answers.
+
+The point had a transformative effect on the model with both the x1 and x2 terms. It switches the model that is determined to be significant as well as the coefficients. In this model, the new data point is an outlier and has more leverage than any other point by a factor of 4. In the x1 model, the point moves the estimated coefficient away from the true value and lowers the R squared by ~25%. In this model, the point is certainly an outlier given its standardized residual over three. It isn't terribly high leverage, however, as a handful of points have more leverage. In the x2 model, the 101st point increases the R squared and the coefficient estimates by significant amounts. In this model, the point is certainly high leverage, but is not an outlier because of its ~1 standardized residual.
+
+```{r}
+lm.14.fit <- lm(y~x1+x2)
+summary(lm.14.fit)
+par(mfrow=c(2,2))
+plot(lm.14.fit)
+
+lm.14.fit2 <- lm(y~x1)
+summary(lm.14.fit2)
+plot(lm.14.fit2)
+
+lm.14.fit3 <- lm(y~x2)
+summary(lm.14.fit3)
+plot(lm.14.fit3)
+```
+
+15. This problem involves the Boston data set, which we saw in the lab
+for this chapter. We will now try to predict per capita crime rate
+using the other variables in this data set. In other words, per capita
+crime rate is the response, and the other variables are the predictors.
+
+(a) For each predictor, fit a simple linear regression model to predict
+the response. Describe your results. In which of the models is
+there a statistically significant association between the predictor
+and the response? Create some plots to back up your assertions.
+
+All of the models except for chas have significant p values. indus, nox, age, rad, and tax all have an R squared value over 0.15.
+
+```{r}
+library(MASS)
+fix(Boston)
+
+par(mfrow=c(1,1))
+
+lm.15.age <- lm(crim~age, data = Boston)
+plot(Boston$age, Boston$crim)
+abline(lm.15.age, col = "blue")
+
+lm.15.rad <- lm(crim~rad, data = Boston)
+plot(Boston$rad, Boston$crim)
+abline(lm.15.rad)
+
+lm.15.tax <- lm(crim~tax, data = Boston)
+plot(Boston$tax, Boston$crim)
+abline(lm.15.tax)
+
+```
+
+(b) Fit a multiple regression model to predict the response using
+all of the predictors. Describe your results. For which predictors
+can we reject the null hypothesis H0 : ßj = 0?
+
+```{r echo = FALSE}
+lm.15.zn <- lm(crim~zn, data = Boston)
+lm.15.indus <- lm(crim~indus, data = Boston)
+lm.15.chas <- lm(crim~chas, data = Boston)
+lm.15.nox <- lm(crim~nox, data = Boston)
+lm.15.rm <- lm(crim~rm, data = Boston)
+lm.15.age <- lm(crim~age, data = Boston)
+lm.15.dis <- lm(crim~age, data = Boston)
+lm.15.rad <- lm(crim~rad, data = Boston)
+lm.15.tax <- lm(crim~tax, data = Boston)
+lm.15.ptratio <- lm(crim~ptratio, data= Boston)
+lm.15.black <- lm(crim~black, data = Boston)
+lm.15.lstat <- lm(crim~lstat, data = Boston)
+lm.15.medv <- lm(crim~medv, data = Boston)
+```
+
+```{r}
+lm.15.fit2 <- lm(crim~., data=Boston)
+summary(lm.15.fit2)
+```
+
+We can reject the null hypothesis for medv, black, dis, rad, and zn.
+
+(c) How do your results from (a) compare to your results from (b)?
+Create a plot displaying the univariate regression coefficients
+from (a) on the x-axis, and the multiple regression coefficients
+from (b) on the y-axis. That is, each predictor is displayed as a
+single point in the plot. Its coefficient in a simple linear regression
+model is shown on the x-axis, and its coefficient estimate
+in the multiple linear regression model is shown on the y-axis.
+
+```{r}
+univariate <- c(lm.15.zn$coefficients[2], lm.15.indus$coefficients[2], lm.15.chas$coefficients[2], 
+                lm.15.nox$coefficients[2], lm.15.rm$coefficients[2], lm.15.age$coefficients[2], 
+                lm.15.dis$coefficients[2], lm.15.rad$coefficients[2], lm.15.tax$coefficients[2],
+                lm.15.ptratio$coefficients[2], lm.15.black$coefficients[2], 
+                lm.15.lstat$coefficients[2],lm.15.medv$coefficients[2])
+
+coefficients <- data.frame('multivariate' = lm.15.fit2$coefficients[2:14], 
+                           'univariate' = univariate)
+
+# Excluding the row for nox as it changes from -10 in the multivariate
+# to 30 in the univariate. This modifies the scale of the plot and
+# makes it difficult to spot the smaller differences in other predictors.
+plot(coefficients$univariate[-4], coefficients$multivariate[-4])
+```
+
+(d) Is there evidence of non-linear association between any of the
+predictors and the response? To answer this question, for each
+predictor X, fit a model of the form
+
+```{r echo = FALSE}
+lm.15.zn <- lm(crim~poly(zn,3), data = Boston)
+lm.15.indus <- lm(crim~poly(indus,3), data = Boston)
+lm.15.chas <- lm(crim~chas, data = Boston)
+lm.15.nox <- lm(crim~poly(nox, 3), data = Boston)
+lm.15.rm <- lm(crim~poly(rm,3), data = Boston)
+lm.15.age <- lm(crim~poly(age,3), data = Boston)
+lm.15.dis <- lm(crim~poly(dis,3), data = Boston)
+lm.15.rad <- lm(crim~poly(rad,3), data = Boston)
+lm.15.tax <- lm(crim~poly(tax,3), data = Boston)
+lm.15.ptratio <- lm(crim~poly(ptratio,3), data= Boston)
+lm.15.black <- lm(crim~poly(black,3), data = Boston)
+lm.15.lstat <- lm(crim~poly(lstat,3), data = Boston)
+lm.15.medv <- lm(crim~poly(medv,3), data = Boston)
+```
+
+Many of the variables have significant polynomial predictors that improve the adjusted R squared. nox and dis had the most compelling improvements in adjusted R squared with the addition of polynomial terms.
+
+
+```{r}
+summary(lm.15.nox)
+plot(Boston$nox, Boston$crim)
+lines(sort(Boston$nox), fitted(lm.15.nox)[order(Boston$nox)], col='red')
+
+summary(lm.15.dis)
+plot(Boston$dis, Boston$crim)
+lines(sort(Boston$dis), fitted(lm.15.dis)[order(Boston$dis)], col='red')
+```
